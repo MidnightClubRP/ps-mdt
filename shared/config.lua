@@ -8,7 +8,7 @@ Config.UseCQCMugshot = true
 Config.MugPhotos = 1 -- Front, Back Side. Use 4 for both sides ( default is 1 )
 Config.Webhook = '' -- Images will be uploaded here ( add a discord webhook )
 
-Config.Fuel = "lj-fuel" -- "LegacyFuel", "lj-fuel"
+Config.Fuel = "ps-fuel" -- "ps-fuel", "ps-fuel"
 
 Config.RosterLink = { -- Google Docs Link
     ['police'] = '',
