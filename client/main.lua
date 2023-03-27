@@ -295,12 +295,12 @@ RegisterNUICallback("saveProfile", function(data, cb)
     local sName = data.sName
     local tags = data.tags
     local gallery = data.gallery
-    local fingerprint = data.fingerprint
     local licenses = data.licenses
-
-    TriggerServerEvent("mdt:server:saveProfile", profilepic, information, cid, fName, sName, tags, gallery, fingerprint, licenses)
+    
+    TriggerServerEvent("mdt:server:saveProfile", profilepic, information, cid, fName, sName, tags, gallery, licenses)
     cb(true)
 end)
+
 
 RegisterNUICallback("getProfileData", function(data, cb)
     local id = data.id
@@ -315,23 +315,19 @@ RegisterNUICallback("getProfileData", function(data, cb)
     end
     local pP = nil
     local result = getProfileDataPromise(id)
+    local vehicles = result.vehicles
+    local licenses = result.licences
 
-    --[[ local getProfileProperties = function(data)
-        if pP then return end
-        pP = promise.new()
-        QBCore.Functions.TriggerCallback('qb-phone:server:MeosGetPlayerHouses', function(result)
-            pP:resolve(result)
-        end, data)
-        return Citizen.Await(pP)
-    end
-    local propertiesResult = getProfileProperties(id)
-    result.properties = propertiesResult
-    ]]
-    local vehicles=result.vehicles
     for i=1,#vehicles do
         local vehicle=result.vehicles[i]
         local vehData = QBCore.Shared.Vehicles[vehicle['vehicle']]
-        result.vehicles[i]['model'] = vehData["name"]
+        
+        if vehData == nil then
+            print("Vehicle not found for profile:", vehicle['vehicle']) -- Do not remove print, is a guide for a nil error. 
+            print("Make sure the profile you're trying to load has all cars added to the core under vehicles.lua.") -- Do not remove print, is a guide for a nil error. 
+        else
+            result.vehicles[i]['model'] = vehData["name"]
+        end
     end
     p = nil
     return cb(result)
@@ -398,8 +394,13 @@ RegisterNUICallback("sendFine", function(data, cb)
     local targetSourceId = Citizen.Await(p)
 
     if fine > 0 then
-        -- Uses QB-Core /bill command
-        ExecuteCommand(('bill %s %s'):format(targetSourceId, fine))
+        if Config.BillVariation then
+            -- Uses QB-Core removeMoney Functions
+            TriggerServerEvent("mdt:server:removeMoney", citizenId, fine)
+        else
+            -- Uses QB-Core /bill command
+            ExecuteCommand(('bill %s %s'):format(targetSourceId, fine))
+        end
     end
 end)
 
